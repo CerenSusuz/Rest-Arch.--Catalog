@@ -1,4 +1,5 @@
 using Catalog.Database.DbContexts;
+using Catalog.Mapping;
 using Catalog.Services.Implementations;
 using Catalog.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -8,14 +9,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<CatalogDbContext>(options =>
     options.UseInMemoryDatabase("CatalogDb"));
-
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IItemService, ItemService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.EnableAnnotations();
+});
 
 var app = builder.Build();
 
