@@ -27,11 +27,33 @@ public class ItemsController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<ItemDto>), StatusCodes.Status200OK)]
     [Produces("application/json")]
     [SwaggerOperation(Summary = "Get items", Description = "Retrieves a list of items. Supports optional filtering by category and pagination.")]
-    public async Task<ActionResult<IEnumerable<ItemDto>>> GetItems([FromQuery] int? categoryId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<IEnumerable<ItemDto>>> GetItems(
+        [FromQuery] int? categoryId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
         var items = await _itemService.GetItemsAsync(categoryId, page, pageSize, cancellationToken);
         var dto = _mapper.Map<IEnumerable<ItemDto>>(items);
 
+        return Ok(dto);
+    }
+
+    /// <summary>
+    /// Get items by category via RESTful route.
+    /// </summary>
+    [HttpGet("~/api/categories/{categoryId}/items")]
+    [ProducesResponseType(typeof(IEnumerable<ItemDto>), StatusCodes.Status200OK)]
+    [Produces("application/json")]
+    [SwaggerOperation(Summary = "Get items by category", Description = "RESTful access to items under a specific category")]
+    public async Task<ActionResult<IEnumerable<ItemDto>>> GetItemsByCategory(
+        int categoryId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var items = await _itemService.GetItemsAsync(categoryId, page, pageSize, cancellationToken);
+        var dto = _mapper.Map<IEnumerable<ItemDto>>(items);
         return Ok(dto);
     }
 
@@ -48,7 +70,7 @@ public class ItemsController : ControllerBase
         var created = await _itemService.CreateItemAsync(item, cancellationToken);
         var resultDto = _mapper.Map<ItemDto>(created);
 
-        return CreatedAtAction(nameof(GetItems), new { id = resultDto.Id }, resultDto);
+        return Created("", resultDto);
     }
 
     /// <summary>
